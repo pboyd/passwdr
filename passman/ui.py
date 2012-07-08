@@ -5,34 +5,31 @@ import kernel
 import events
 import ops
 
-class PassmanUI:
+from receiver import Receiver
+
+class PassmanUI(Receiver):
     def __init__(self):
         ops.account.Account().register()
         self.register()
 
-    def register(self):
-        kernel.subscribe(events.AccountList, self)
-        kernel.subscribe(events.AccountFound, self)
+    def events(self):
+        return [ events.AccountList,
+                 events.AccountFound ]
 
-    def receive_event(self, event):
-        if isinstance(event, events.AccountList):
-            self._show_accounts(event.accounts)
-        elif isinstance(event, events.AccountFound):
-            self._show_account(event.account)
-
-    def _show_accounts(self, accounts):
+    def _handle_AccountList(self, event):
         print "Account List"
-        for account in accounts:
+        for account in event.accounts:
             print "%-15s %s" % (account.key(), account.note())
 
-    def _show_account(self, account):
-        print account.key()
-        if account.note():
-            print account.note()
+    def _handle_AccountFound(self, event):
+        acct = event.account
+        print acct.key()
+        if acct.note():
+            print acct.note()
 
         print ""
-        print "Username: %s" % (account.username())
-        print "Password: %s" % (account.password())
+        print "Username: %s" % (acct.username())
+        print "Password: %s" % (acct.password())
 
     def run(self):
         parser = argparse.ArgumentParser()

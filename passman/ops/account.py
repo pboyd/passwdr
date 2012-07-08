@@ -2,19 +2,15 @@ import kernel, events
 import os
 import persistance
 
-class Account:
+from receiver import Receiver
+
+class Account(Receiver):
     def __init__(self):
         self._path = os.path.expanduser("~/.passman")
 
-    def register(self):
-        kernel.subscribe(events.GetAccountList, self)
-        kernel.subscribe(events.FindAccountByKey, self)
-
-    def receive_event(self, event):
-        if isinstance(event, events.GetAccountList):
-            self._get_account_list()
-        elif isinstance(event, events.FindAccountByKey):
-            self._find_account_by_key(event.key)
+    def events(self):
+        return [ events.GetAccountList,
+                 events.FindAccountByKey ]
 
     def _load(self):
         if not os.path.isfile(self._path):
@@ -23,14 +19,14 @@ class Account:
 
         return persistance.read(self._path)
 
-    def _get_account_list(self):
+    def _handle_GetAccountList(self, event):
         accounts = self._load()
         kernel.queue(events.AccountList(accounts))
 
-    def _find_account_by_key(self, key):
+    def _handle_FindAccountByKey(self, event):
         accounts = self._load()
         for a in accounts:
-            if a.key() == key:
+            if a.key() == event.key:
                 kernel.queue(events.AccountFound(a))
 
         kernel.queue(events.NotFound())
