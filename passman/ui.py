@@ -71,6 +71,13 @@ class PassmanUI(Receiver):
 
         kernel.queue(events.NewAccount(account))
 
+    def _command_rm(self, args):
+        if len(args) == 0:
+            print "usage: rm account_key"
+            return
+
+        kernel.queue(events.DeleteAccount(args[0]))
+
     def _command_show(self, args):
         if len(args) == 0:
             print "usage: show account_key"

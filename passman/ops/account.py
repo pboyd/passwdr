@@ -11,7 +11,8 @@ class Account(Receiver):
     def events(self):
         return [ events.GetAccountList,
                  events.FindAccountByKey,
-                 events.NewAccount ]
+                 events.NewAccount,
+                 events.DeleteAccount ]
 
     def _load(self):
         if not os.path.isfile(self._path):
@@ -26,11 +27,12 @@ class Account(Receiver):
 
     def _handle_FindAccountByKey(self, event):
         accounts = self._load()
-        for a in accounts:
-            if a.key() == event.key:
-                kernel.queue(events.AccountFound(a))
 
-        kernel.queue(events.NotFound())
+        a = self._find_by_key(accounts, event.key)
+        if a == None:
+            kernel.queue(events.NotFound())
+        else:
+            kernel.queue(events.AccountFound(a))
 
     def _handle_NewAccount(self, event):
         accounts = self._load()
@@ -38,4 +40,24 @@ class Account(Receiver):
         persistance.write(self._path, accounts)
 
         kernel.queue(events.Success("Account created"))
+
+    def _handle_DeleteAccount(self, event):
+        accounts = self._load()
+        a = self._find_by_key(accounts, event.key)
+
+        if a == None:
+            kernel.queue(events.NotFound())
+            return
+
+        accounts.remove(a)
+        persistance.write(self._path, accounts)
+
+        kernel.queue(events.Success("Account removed"))
+
+    def _find_by_key(self, accounts, key):
+        for acct in accounts:
+            if acct.key() == key:
+                return acct
+
+        return None
 

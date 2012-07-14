@@ -25,6 +25,11 @@ class NewAccount(Event):
         self.account = account
         Event.__init__(self)
 
+class DeleteAccount(Event):
+    def __init__(self, key):
+        self.key = key
+        Event.__init__(self)
+
 class Success(Event):
     def __init__(self, message):
         self.message = message
