@@ -4,6 +4,7 @@ import argparse
 import kernel
 import events
 import ops
+from account import Account
 
 from receiver import Receiver
 
@@ -14,7 +15,8 @@ class PassmanUI(Receiver):
 
     def events(self):
         return [ events.AccountList,
-                 events.AccountFound ]
+                 events.AccountFound,
+                 events.Success ]
 
     def _handle_AccountList(self, event):
         for account in event.accounts:
@@ -34,6 +36,9 @@ class PassmanUI(Receiver):
             print "Note: %s" % (acct.note())
             print ""
 
+    def _handle_Success(self, event):
+        print event.message
+
     def run(self):
         parser = argparse.ArgumentParser()
         parser.add_argument("command")
@@ -52,6 +57,19 @@ class PassmanUI(Receiver):
 
     def _command_list(self, args):
         kernel.queue(events.GetAccountList())
+
+    def _command_add(self, args):
+        if len(args) < 3:
+            print "usage: add account_key username password [note]"
+            return
+
+        account = Account(args[0])
+        account.setUsername(args[1])
+        account.setPassword(args[2])
+        if len(args) > 3:
+            account.setNote(args[3])
+
+        kernel.queue(events.NewAccount(account))
 
     def _command_show(self, args):
         if len(args) == 0:

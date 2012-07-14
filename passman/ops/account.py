@@ -10,7 +10,8 @@ class Account(Receiver):
 
     def events(self):
         return [ events.GetAccountList,
-                 events.FindAccountByKey ]
+                 events.FindAccountByKey,
+                 events.NewAccount ]
 
     def _load(self):
         if not os.path.isfile(self._path):
@@ -30,4 +31,11 @@ class Account(Receiver):
                 kernel.queue(events.AccountFound(a))
 
         kernel.queue(events.NotFound())
+
+    def _handle_NewAccount(self, event):
+        accounts = self._load()
+        accounts.append(event.account)
+        persistance.write(self._path, accounts)
+
+        kernel.queue(events.Success("Account created"))
 

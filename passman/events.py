@@ -20,5 +20,15 @@ class AccountFound(Event):
         self.account = account
         Event.__init__(self)
 
+class NewAccount(Event):
+    def __init__(self, account):
+        self.account = account
+        Event.__init__(self)
+
+class Success(Event):
+    def __init__(self, message):
+        self.message = message
+        Event.__init__(self)
+
 class NotFound(Event):
     pass
