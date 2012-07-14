@@ -16,7 +16,8 @@ class PassmanUI(Receiver):
     def events(self):
         return [ events.AccountList,
                  events.AccountFound,
-                 events.Success ]
+                 events.Success,
+                 events.NotFound ]
 
     def _handle_AccountList(self, event):
         for account in event.accounts:
@@ -38,6 +39,9 @@ class PassmanUI(Receiver):
 
     def _handle_Success(self, event):
         print event.message
+
+    def _handle_NotFound(self, event):
+        print "Account not found"
 
     def run(self):
         parser = argparse.ArgumentParser()
@@ -83,8 +87,14 @@ class PassmanUI(Receiver):
             print "usage: show account_key"
             return
 
-        key = args[0]
         kernel.queue(events.FindAccountByKey(args[0]))
+
+    def _command_set(self, args):
+        if len(args) != 3:
+            print "usage: set account_key field new_value"
+            return
+
+        kernel.queue(events.UpdateAccountField(args[0], args[1], args[2]))
 
 if __name__ == "__main__":
     PassmanUI().run()

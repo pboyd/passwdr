@@ -1,4 +1,5 @@
 import kernel
+import sys
 
 class Receiver:
     """Base class to aid classes that need to receive events.
@@ -15,4 +16,6 @@ class Receiver:
         if hasattr(self, method_name):
             method = getattr(self, method_name)
             method(event)
+        else:
+            sys.stderr.write("Error: No method called %s defined in %s\n" % (method_name, self.__class__))
 

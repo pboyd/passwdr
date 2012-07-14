@@ -12,7 +12,8 @@ class Account(Receiver):
         return [ events.GetAccountList,
                  events.FindAccountByKey,
                  events.NewAccount,
-                 events.DeleteAccount ]
+                 events.DeleteAccount,
+                 events.UpdateAccountField ]
 
     def _load(self):
         if not os.path.isfile(self._path):
@@ -53,6 +54,23 @@ class Account(Receiver):
         persistance.write(self._path, accounts)
 
         kernel.queue(events.Success("Account removed"))
+
+    def _handle_UpdateAccountField(self, event):
+        accounts = self._load()
+        a = self._find_by_key(accounts, event.key)
+
+        if a == None:
+            kernel.queue(events.NotFound())
+            return
+
+        setter = "set%s" % (event.field.title())
+        if hasattr(a, setter):
+            method = getattr(a, setter)
+            method(event.value)
+
+        persistance.write(self._path, accounts)
+
+        kernel.queue(events.Success("Account updated"))
 
     def _find_by_key(self, accounts, key):
         for acct in accounts:

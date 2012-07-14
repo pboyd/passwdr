@@ -1,12 +1,15 @@
 class Account:
     def __init__(self, key):
-        self._key = key
+        self.setKey(key)
         self.setNote(None)
         self.setUsername(None)
         self.setPassword(None)
 
     def key(self):
         return self._key
+
+    def setKey(self, value):
+        self._key = value
 
     def note(self):
         return self._note

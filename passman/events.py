@@ -30,6 +30,13 @@ class DeleteAccount(Event):
         self.key = key
         Event.__init__(self)
 
+class UpdateAccountField(Event):
+    def __init__(self, key, field, value):
+        self.key = key
+        self.field = field
+        self.value = value
+        Event.__init__(self)
+
 class Success(Event):
     def __init__(self, message):
         self.message = message

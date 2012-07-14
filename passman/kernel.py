@@ -29,6 +29,8 @@ def _worker():
             if event_type in _events:
                 for handler in _events[event_type]:
                     handler.receive_event(event)
+            else:
+                sys.stderr.write("Error: No handler configured for %s events\n" % event_type)
 
             _queue.task_done()
         except:
