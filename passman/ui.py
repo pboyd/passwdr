@@ -17,19 +17,22 @@ class PassmanUI(Receiver):
                  events.AccountFound ]
 
     def _handle_AccountList(self, event):
-        print "Account List"
         for account in event.accounts:
-            print "%-15s %s" % (account.key(), account.note())
+            if account.note():
+                print "%-15s %s" % (account.key(), account.note())
+            else:
+                print "%-15s" % (account.key())
 
     def _handle_AccountFound(self, event):
         acct = event.account
         print acct.key()
-        if acct.note():
-            print acct.note()
-
-        print ""
         print "Username: %s" % (acct.username())
         print "Password: %s" % (acct.password())
+        print ""
+
+        if acct.note():
+            print "Note: %s" % (acct.note())
+            print ""
 
     def run(self):
         parser = argparse.ArgumentParser()
