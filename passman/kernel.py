@@ -1,6 +1,8 @@
 from Queue import Queue
 from threading import Thread
 
+import sys, traceback
+
 _events = {}
 _queue = Queue()
 
@@ -20,14 +22,21 @@ def join():
 
 def _worker():
     while True:
-        event = _queue.get()
-        event_type = event.__class__.__name__
+        try:
+            event = _queue.get()
+            event_type = event.__class__.__name__
 
-        if event_type in _events:
-            for handler in _events[event_type]:
-                handler.receive_event(event)
+            if event_type in _events:
+                for handler in _events[event_type]:
+                    handler.receive_event(event)
 
-        _queue.task_done()
+            _queue.task_done()
+        except:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            traceback.print_exception(exc_type, exc_value, exc_traceback)
+
+            # Mark the current event done to prevent the app from hanging
+            _queue.task_done()
 
 def run():
     t = Thread(target=_worker)
