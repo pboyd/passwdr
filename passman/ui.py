@@ -17,7 +17,8 @@ class PassmanUI(Receiver):
         return [ events.AccountList,
                  events.AccountFound,
                  events.Success,
-                 events.NotFound ]
+                 events.NotFound,
+                 events.DuplicateKeyError ]
 
     def _handle_AccountList(self, event):
         for account in event.accounts:
@@ -42,6 +43,9 @@ class PassmanUI(Receiver):
 
     def _handle_NotFound(self, event):
         print "Account not found"
+
+    def _handle_DuplicateKeyError(self, event):
+        print "Duplicate account key %s" % (event.key)
 
     def run(self):
         parser = argparse.ArgumentParser()

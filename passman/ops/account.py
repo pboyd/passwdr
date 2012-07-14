@@ -38,6 +38,10 @@ class Account(Receiver):
     def _handle_NewAccount(self, event):
         accounts = self._load()
         accounts.append(event.account)
+
+        if self._has_duplicate_keys(accounts):
+            return
+
         persistance.write(self._path, accounts)
 
         kernel.queue(events.Success("Account created"))
@@ -68,6 +72,9 @@ class Account(Receiver):
             method = getattr(a, setter)
             method(event.value)
 
+        if self._has_duplicate_keys(accounts):
+            return
+
         persistance.write(self._path, accounts)
 
         kernel.queue(events.Success("Account updated"))
@@ -79,3 +86,13 @@ class Account(Receiver):
 
         return None
 
+    def _has_duplicate_keys(self, accounts):
+        keys = {}
+        for acct in accounts:
+            if acct.key() in keys:
+                kernel.queue(events.DuplicateKeyError(acct.key()))
+                return True
+
+            keys[acct.key()] = 1
+
+        return False

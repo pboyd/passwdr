@@ -37,6 +37,11 @@ class UpdateAccountField(Event):
         self.value = value
         Event.__init__(self)
 
+class DuplicateKeyError(Event):
+    def __init__(self, key):
+        self.key = key
+        Event.__init__(self)
+
 class Success(Event):
     def __init__(self, message):
         self.message = message
