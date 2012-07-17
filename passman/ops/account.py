@@ -33,6 +33,7 @@ class Account(Receiver):
         if a == None:
             kernel.queue(events.NotFound())
         else:
+            a.setEncryptionKey(event.encryption_key)
             kernel.queue(events.AccountFound(a))
 
     def _handle_NewAccount(self, event):
@@ -67,10 +68,14 @@ class Account(Receiver):
             kernel.queue(events.NotFound())
             return
 
-        setter = "set%s" % (event.field.title())
-        if hasattr(a, setter):
-            method = getattr(a, setter)
-            method(event.value)
+        if event.field == "password":
+            a.setEncryptionKey(event.encryption_key)
+            a.setPassword(event.value)
+        else:
+            setter = "set%s" % (event.field.title())
+            if hasattr(a, setter):
+                method = getattr(a, setter)
+                method(event.value)
 
         if self._has_duplicate_keys(accounts):
             return

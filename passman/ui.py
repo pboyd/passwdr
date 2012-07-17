@@ -49,6 +49,7 @@ class PassmanUI(Receiver):
 
     def run(self):
         parser = argparse.ArgumentParser()
+        parser.add_argument("-k", "--key", help="encryption key")
         parser.add_argument("command")
         parser.add_argument("args", nargs='*')
         args = parser.parse_args()
@@ -56,7 +57,7 @@ class PassmanUI(Receiver):
         method_name = "_command_%s" % args.command
         if hasattr(self, method_name):
             method = getattr(self, method_name)
-            method(args.args)
+            method(args)
         else:
             sys.stderr.write("error: Unknown command \"%s\"\n" % args.command)
 
@@ -67,38 +68,38 @@ class PassmanUI(Receiver):
         kernel.queue(events.GetAccountList())
 
     def _command_add(self, args):
-        if len(args) < 3:
+        if len(args.args) < 3:
             print "usage: add account_key username password [note]"
             return
 
-        account = Account(args[0])
-        account.setUsername(args[1])
-        account.setPassword(args[2])
-        if len(args) > 3:
-            account.setNote(args[3])
+        account = Account(args.args[0], args.key)
+        account.setUsername(args.args[1])
+        account.setPassword(args.args[2])
+        if len(args.args) > 3:
+            account.setNote(args.args[3])
 
         kernel.queue(events.NewAccount(account))
 
     def _command_rm(self, args):
-        if len(args) == 0:
+        if len(args.args) == 0:
             print "usage: rm account_key"
             return
 
-        kernel.queue(events.DeleteAccount(args[0]))
+        kernel.queue(events.DeleteAccount(args.args[0]))
 
     def _command_show(self, args):
-        if len(args) == 0:
+        if len(args.args) == 0:
             print "usage: show account_key"
             return
 
-        kernel.queue(events.FindAccountByKey(args[0]))
+        kernel.queue(events.FindAccountByKey(args.args[0], args.key))
 
     def _command_set(self, args):
-        if len(args) != 3:
+        if len(args.args) != 3:
             print "usage: set account_key field new_value"
             return
 
-        kernel.queue(events.UpdateAccountField(args[0], args[1], args[2]))
+        kernel.queue(events.UpdateAccountField(args.args[0], args.args[1], args.args[2], args.key))
 
 if __name__ == "__main__":
     PassmanUI().run()

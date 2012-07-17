@@ -11,8 +11,9 @@ class AccountList(Event):
         Event.__init__(self)
 
 class FindAccountByKey(Event):
-    def __init__(self, key):
+    def __init__(self, key, encryption_key):
         self.key = key
+        self.encryption_key = encryption_key
         Event.__init__(self)
 
 class AccountFound(Event):
@@ -31,10 +32,11 @@ class DeleteAccount(Event):
         Event.__init__(self)
 
 class UpdateAccountField(Event):
-    def __init__(self, key, field, value):
+    def __init__(self, key, field, value, encryption_key):
         self.key = key
         self.field = field
         self.value = value
+        self.encryption_key = encryption_key
         Event.__init__(self)
 
 class DuplicateKeyError(Event):
