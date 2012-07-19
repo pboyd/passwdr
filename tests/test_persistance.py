@@ -14,7 +14,7 @@ class PersistanceTest(unittest.TestCase):
         a = Account('the_key')
         a.setNote('the note')
         a.setUsername('the username')
-        a.setPassword('the password')
+        a.setEncryptedPassword('the password')
 
         f = tempfile.TemporaryFile()
         persistance.writefp(f, [a])
@@ -86,37 +86,6 @@ class PersistanceTest(unittest.TestCase):
         self.assertEqual(len(accounts), 1)
 
         os.unlink(path)
-
-    def testEncryption(self):
-        a = Account('the_key')
-        a.setUsername('user')
-        a.setPassword('pass')
-
-        f = tempfile.TemporaryFile()
-
-        # write it with an encryption key
-        persistance.writefp(f, [a], 'encryption key')
-        f.seek(0)
-
-        # read it un-encrypted
-        accounts = persistance.readfp(f)
-
-        self.assertNotEqual(accounts[0].password(), 'pass')
-
-    def testDecryption(self):
-        a = Account('the_key')
-        a.setUsername('user')
-        a.setPassword('pass')
-
-        f = tempfile.TemporaryFile()
-
-        key = 'encryption key'
-        persistance.writefp(f, [a], key)
-        f.seek(0)
-        accounts = persistance.readfp(f, key)
-
-        self.assertEqual(accounts[0].password(), 'pass')
-
 
 if __name__ == "__main__":
     unittest.main()
