@@ -4,7 +4,7 @@ import sys
 import os
 sys.path.append(os.path.abspath('%s/../..' % (__file__)))
 
-from passman.account import Account
+from passwdr.account import Account
 
 class AccountTest(unittest.TestCase):
     def testConstructor(self):

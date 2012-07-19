@@ -6,7 +6,7 @@ from receiver import Receiver
 
 class Account(Receiver):
     def __init__(self):
-        self._path = os.path.expanduser("~/.passman")
+        self._path = os.path.expanduser("~/.passwdr")
 
     def events(self):
         return [ events.GetAccountList,

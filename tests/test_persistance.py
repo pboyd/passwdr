@@ -6,8 +6,8 @@ import sys
 import os
 sys.path.append(os.path.abspath('%s/../..' % (__file__)))
 
-from passman import persistance
-from passman.account import Account
+from passwdr import persistance
+from passwdr.account import Account
 
 class PersistanceTest(unittest.TestCase):
     def testWritefp(self):
