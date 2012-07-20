@@ -24,17 +24,17 @@ class Account(Receiver):
 
     def _handle_GetAccountList(self, event):
         accounts = self._load()
-        kernel.queue(events.AccountList(accounts))
+        kernel.queue(events.AccountList(accounts, event.session))
 
     def _handle_FindAccountByKey(self, event):
         accounts = self._load()
 
         a = self._find_by_key(accounts, event.key)
         if a == None:
-            kernel.queue(events.NotFound())
+            kernel.queue(events.NotFound(event.session))
         else:
-            a.setEncryptionKey(event.encryption_key)
-            kernel.queue(events.AccountFound(a))
+            a.setEncryptionKey(event.session['encryption_key'])
+            kernel.queue(events.AccountFound(a, event.session))
 
     def _handle_NewAccount(self, event):
         accounts = self._load()
@@ -45,31 +45,31 @@ class Account(Receiver):
 
         persistance.write(self._path, accounts)
 
-        kernel.queue(events.Success("Account created"))
+        kernel.queue(events.Success("Account created", event.session))
 
     def _handle_DeleteAccount(self, event):
         accounts = self._load()
         a = self._find_by_key(accounts, event.key)
 
         if a == None:
-            kernel.queue(events.NotFound())
+            kernel.queue(events.NotFound(event.session))
             return
 
         accounts.remove(a)
         persistance.write(self._path, accounts)
 
-        kernel.queue(events.Success("Account removed"))
+        kernel.queue(events.Success("Account removed", event.session))
 
     def _handle_UpdateAccountField(self, event):
         accounts = self._load()
         a = self._find_by_key(accounts, event.key)
 
         if a == None:
-            kernel.queue(events.NotFound())
+            kernel.queue(events.NotFound(event.session))
             return
 
         if event.field == "password":
-            a.setEncryptionKey(event.encryption_key)
+            a.setEncryptionKey(event.session['encryption_key'])
             a.setPassword(event.value)
         else:
             setter = "set%s" % (event.field.title())
@@ -82,7 +82,7 @@ class Account(Receiver):
 
         persistance.write(self._path, accounts)
 
-        kernel.queue(events.Success("Account updated"))
+        kernel.queue(events.Success("Account updated", event.session))
 
     def _find_by_key(self, accounts, key):
         for acct in accounts:
@@ -95,7 +95,7 @@ class Account(Receiver):
         keys = {}
         for acct in accounts:
             if acct.key() in keys:
-                kernel.queue(events.DuplicateKeyError(acct.key()))
+                kernel.queue(events.DuplicateKeyError(acct.key(), event.session))
                 return True
 
             keys[acct.key()] = 1
